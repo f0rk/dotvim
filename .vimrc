@@ -1,16 +1,40 @@
-set et ts=4 sw=4 sts=4                  " expand tabs to spaces, tabs are four spaces
+" pathogen
+filetype off
+call pathogen#runtime_append_all_bundles()
+filetype plugin indent on
+
+" semi-colon is the new colon
+nnoremap ; :
+
+" tabs
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+
+" indentation
 set autoindent                          " reformat pastes and such
 set smartindent                         " smart indent (eg tab over in a function)
-set nocompatible                        " Use Vim defaults (much better!)
-set showmatch                           " show balanced brace constructs
-set bs=indent,eol,start                 " allow backspacing over everything in insert mode
-set viminfo='10,\"50,:20,%,n~/.viminfo  " read/write a .viminfo file, don't store more than 50 lines of registers
-set ruler                               " show the cursor position all the time
-set hlsearch                            " highlight last search term
-set incsearch                           " highlight search while typing
-set scrolloff=10                        " 10 lines of top/bottom scroll context
 
-set laststatus=2                        " make the status line visible
+" leader commands
+let mapleader=","
+" hard wrap paragraphs
+nnoremap <leader>w gqip
+" select last paste
+nnoremap <leader>v V`]                  
+" rainbow parens
+nnoremap <leader>r :RainbowParenthesesToggle<CR>
+
+" last line helpers
+set showmode
+set showcmd
+
+" command line completion
+set wildmode=list:longest
+set wildmenu
+
+" status line
+set laststatus=2                        " status line always visible
 set statusline=%F%m%r%h%w\ [%L][%{&ff}]%y[%p%%][%04l,%04v]
 "              | | | | |  |   |      |  |     |    |
 "              | | | | |  |   |      |  |     |    +-- current column
@@ -25,24 +49,56 @@ set statusline=%F%m%r%h%w\ [%L][%{&ff}]%y[%p%%][%04l,%04v]
 "              | +-- modified flag 
 "              +-- full file path
 
+" where the lines around me are
+" set relativenumber
+
+" searching/substituting
+set hlsearch                            " highlight last search term
+set incsearch                           " highlight search while typing
+set ignorecase
+set smartcase
+set gdefault                            " global replace on lines by default
+" clear a highlighted search
+nnoremap <leader><space> :noh<cr>
+
+" remember commands/searches/marks
+set viminfo='10,\"50,:20,%,n~/.viminfo
+au BufReadPost * " When editing a file, always jump to the last cursor position
+\ if line("'\"") > 0 && line ("'\"") <= line("$") |
+\   exe "normal! g'\"" |
+\ endif
+
+" braces
+set showmatch                           " show balanced brace constructs
 set matchtime=2                         " how many tenths of a second to blink matching brackets for
+" jump between braces
+nnoremap <tab> %
+vnoremap <tab> %
+
+" Folding
+set foldlevelstart=0
+nnoremap <Space> za
+vnoremap <Space> za
+au Syntax c,cpp,vim,xml,html,xhtml,perl,javascript,csharp set foldmethod=indent
+
+" backspace over everything
+set bs=indent,eol,start
+
+" scroll context
+set scrolloff=10
 
 " color
 syntax enable
 colorscheme desert
 
-" enable support for specific filetypes
-filetype plugin indent on
-
-" When editing a file, always jump to the last cursor position
-au BufReadPost *
-\ if line("'\"") > 0 && line ("'\"") <= line("$") |
-\   exe "normal! g'\"" |
-\ endif
-
 " insert newline below/above without entering insert mode
 map <F8> o<Esc>
 map <F9> O<Esc>
+
+" terminal help be-gone
+inoremap <F1> <ESC>
+nnoremap <F1> <ESC>
+vnoremap <F1> <ESC>
 
 " template files
 autocmd BufNewFile *.pl 0r /usr/share/vim/vimfiles/template.pl
@@ -60,9 +116,6 @@ au BufNewFile,BufReadPre /media/*,/mnt/* set directory=/tmp,/var/tmp,~/tmp
 
 " write harder
 command W w !sudo tee % > /dev/null
-
-" fold by default (use indent because syntax isn't working)
-au Syntax c,cpp,vim,xml,html,xhtml,perl,javascript set foldmethod=indent
 
 " cscope for c/c++ projects
 if has("cscope") && filereadable("/usr/bin/cscope")
