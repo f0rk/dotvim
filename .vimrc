@@ -22,8 +22,15 @@ let mapleader=","
 nnoremap <leader>w gqip
 " select last paste
 nnoremap <leader>v V`]                  
-" rainbow parens
-nnoremap <leader>r :RainbowParenthesesToggle<CR>
+" relative line numbering
+nnoremap <leader>r :set rnu<cr>
+nnoremap <leader>R :set nornu<cr>
+" set paste
+nnoremap <leader>p :set paste<cr>
+
+" centralize swap files
+set backupdir=~/.vimbackup
+set directory=~/.vimswap
 
 " last line helpers
 set showmode
@@ -35,7 +42,7 @@ set wildmenu
 
 " status line
 set laststatus=2                        " status line always visible
-set statusline=%F%m%r%h%w\ [%L][%{&ff}]%y[%p%%][%04l,%04v]
+" set statusline=%F%m%r%h%w\ [%L][%{&ff}]%y[%p%%][%04l,%04v]
 "              | | | | |  |   |      |  |     |    |
 "              | | | | |  |   |      |  |     |    +-- current column
 "              | | | | |  |   |      |  |     +-- current line
@@ -49,8 +56,7 @@ set statusline=%F%m%r%h%w\ [%L][%{&ff}]%y[%p%%][%04l,%04v]
 "              | +-- modified flag 
 "              +-- full file path
 
-" where the lines around me are
-" set relativenumber
+set statusline=[%04l,%04v][%p%%][%L]\ [%{&ff}]%y\ %F%m%r%h%w
 
 " searching/substituting
 set hlsearch                            " highlight last search term
@@ -63,10 +69,13 @@ nnoremap <leader><space> :noh<cr>
 
 " remember commands/searches/marks
 set viminfo='10,\"50,:20,%,n~/.viminfo
-au BufReadPost * " When editing a file, always jump to the last cursor position
-\ if line("'\"") > 0 && line ("'\"") <= line("$") |
-\   exe "normal! g'\"" |
-\ endif
+set undodir=~/.vimundo
+set undofile
+" au BufReadPost * " When editing a file, always jump to the last cursor position
+" \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+" \   exe "normal! g'\"" |
+" \ endif
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 
 " braces
 set showmatch                           " show balanced brace constructs
@@ -95,27 +104,34 @@ colorscheme desert
 map <F8> o<Esc>
 map <F9> O<Esc>
 
+" run current perl script
+map <F12> :w<CR><ESC>:!perl %<CR>
+
 " terminal help be-gone
 inoremap <F1> <ESC>
 nnoremap <F1> <ESC>
 vnoremap <F1> <ESC>
 
-" template files
-autocmd BufNewFile *.pl 0r /usr/share/vim/vimfiles/template.pl
-command LB 0r /usr/share/vim/vimfiles/lb-update-template.txt
-
-" In text files, limit the width of text to 72 characters
-au BufRead *.txt set tw=72
+" In text files, limit the width of text to 79 characters
+au BufRead *.txt set tw=79
 
 " replace trailing whitespace and tabs in cfg files
 au BufRead *.cfg retab
 au BufRead,BufWrite *.cfg :%s/\s\+$//e
 
-" don't write swapfile on most commonly used directories for NFS mounts or USB sticks
-au BufNewFile,BufReadPre /media/*,/mnt/* set directory=/tmp,/var/tmp,~/tmp
+" don't write swapfile on stdin
+au StdinReadPre * set noswapfile nobackup
 
 " write harder
 command W w !sudo tee % > /dev/null
+
+" pep-8 compliance
+au FileType python match ErrorMsg '\%>80v.\+'
+" au FileType python match ErrorMsg '\s\+$'
+au BufRead,BufWrite *.py :%s/\s\+$//e
+
+" Mako files
+au FileType mako set encoding=utf-8 ts=2 sw=2 expandtab
 
 " cscope for c/c++ projects
 if has("cscope") && filereadable("/usr/bin/cscope")
@@ -226,7 +242,7 @@ endif
 
 if &term=="xterm"
     set t_Co=8
-    set t_Sb=^[[4%dm
-    set t_Sf=^[[3%dm
+	set t_Sb=^[[4%dm
+	set t_Sf=^[[3%dm
 endif
 
