@@ -112,6 +112,9 @@ inoremap <F1> <ESC>
 nnoremap <F1> <ESC>
 vnoremap <F1> <ESC>
 
+" make split windows open to the right by default
+set splitright
+
 " In text files, limit the width of text to 79 characters
 au BufRead *.txt set tw=79
 
